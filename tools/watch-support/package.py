@@ -42,5 +42,8 @@ if (root/'NativeIDeviceSource/ffi/src/watch_connection_probe.rs').is_file():
     report.update(watch_connection_probe=True,
                   idevice_base='3e55c8486b2057e40c1f74aaaa1155c82341cf76',
                   probe_changes_apps=False, physical_probe_verified=False)
+if (root/'Dependencies/SideSign/Sources/Models/FWOSRecoveryAdvice.swift').is_file():
+    report.update(os_recovery_overlay=True, codesignkit_base='d0c67710fda9a2646b9e829cb2cf443892728371',
+                  physical_os_update_recovery_verified=False, future_ios_compatibility_guaranteed=False)
 (out/'SideStore-Watch-build.json').write_text(json.dumps(report, indent=2)+'\n')
 print(json.dumps(report))

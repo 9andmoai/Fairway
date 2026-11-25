@@ -24,6 +24,13 @@ jobs:
           repository: SideStore/idevice
           ref: 3e55c8486b2057e40c1f74aaaa1155c82341cf76
           path: build/SideStore/NativeIDeviceSource
+      - uses: actions/checkout@v4
+        with:
+          repository: mahee96/CodeSignKit
+          ref: d0c67710fda9a2646b9e829cb2cf443892728371
+          path: build/SideStore/Dependencies/CodeSignKit
+      - name: OS recovery policy tests
+        run: swift test --package-path tools/watch-support/Recovery
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-ios
@@ -42,6 +49,7 @@ jobs:
           python3 tools/watch-support/apply_watch_install.py build/SideStore build/SideStore/NativeIDeviceSource
           python3 tools/watch-support/apply_refresh_diagnostic.py build/SideStore
           python3 tools/watch-support/apply_group_refresh_fix.py build/SideStore
+          python3 tools/watch-support/apply_os_recovery.py build/SideStore
       - name: Native Watch unit tests
         working-directory: build/SideStore/NativeIDeviceSource
         env:
@@ -71,7 +79,7 @@ jobs:
           FAIRWAY_TEST_IPA: ${{ github.workspace }}/tools/watch-support/fixtures/Fairway-0.3.0-unsigned.ipa
         run: |
           set -o pipefail
-          swift test --filter WatchSupportTests 2>&1 | tee ../../../watch-tests.log
+          swift test --filter "WatchSupportTests|OSRecoveryTests" 2>&1 | tee ../../../watch-tests.log
       - name: Build unsigned experimental SideStore
         working-directory: build/SideStore
         run: |
@@ -83,7 +91,7 @@ jobs:
         run: python3 tools/watch-support/package.py build/SideStore
       - uses: actions/upload-artifact@v4
         with:
-          name: SideStore-Watch-direct-install
+          name: SideStore-Watch-OS-recovery
           path: |
             build/SideStore-Watch-personal.ipa
             build/SideStore-Watch-personal-source.zip
