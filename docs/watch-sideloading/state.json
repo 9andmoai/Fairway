@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-11-05",
+  "updated": "2026-11-25",
   "path_base": "repository-root",
   "entry_point": "docs/watch-sideloading/README.md",
   "current_strategy": {
@@ -230,6 +230,24 @@
     "pairing_failure_confirmed": false,
     "physical_recovery_verified": false,
     "preserve_apps_accounts_certificates_and_watch_trust": true,
-    "future_ios_compatibility_guaranteed": false
+    "future_ios_compatibility_guaranteed": false,
+    "source_commit": "0f44f5edb8f1cc240da8bce46fb954dfa8d550dd",
+    "ci": "https://github.com/9andmoai/Fairway/actions/runs/45633315578",
+    "ci_conclusion": "success",
+    "tests": {
+      "recovery_policy": 12,
+      "native_watch": 8,
+      "certificate_parser": 5,
+      "watch_signing": 27
+    },
+    "total_tests": 52,
+    "ipa_sha256": "41be6e7800bd2a101dc492c95693bf57edd90478f798af45ee39e08f68818b60",
+    "source_sha256": "2b80e8e2fe326bd42e67c33353569de1422405941932a0710362b92711c50137",
+    "unsigned": true,
+    "physical_os_update_recovery_verified": false,
+    "affected_device_fairway_launch": "unconfirmed",
+    "ipa": "release/SideStore-Watch-OS-Recovery-20261125/SideStore-Watch-OS-Recovery.ipa",
+    "source_zip": "release/SideStore-Watch-OS-Recovery-20261125/SideStore-Watch-OS-Recovery-source.zip",
+    "status": "build-and-regression-tested-physical-recovery-unverified"
   }
 }

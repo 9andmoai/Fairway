@@ -1,7 +1,7 @@
 ---
 topic: sidestore-ios-update-recovery
 updated: 2026-11-25
-status: implementation-under-test-physical-recovery-unverified
+status: build-and-regression-tested-physical-recovery-unverified
 ---
 
 # iOS更新後にSideStoreが使えない場合
@@ -33,6 +33,10 @@ status: implementation-under-test-physical-recovery-unverified
 6. SideStoreを開ける場合だけ、Wi-FiとLocalDevVPNを接続し、SideStoreの「Settings → Watch対応 → iOS更新後の接続確認 → iPhoneの接続を確認」を押す。`OS Recovery 20261125`が新版の識別表示。
 7. 接続成功後、「My Apps」でSideStoreの残り日数を押してRefreshし、次にFairwayの残り日数を押す。最後にWatchでFairwayを開く。日数表示だけで全端末の成功と判定しない。
 
+### ポートを手動指定していた場合
+
+この対策版は手動指定を勝手に上書きしない。「Settings → Connection Config」で「Use Local VPN」を使っていることを確認し、「RemotePair Port」に古い数値がある場合は、その数値を控えてから空欄にし、右上の「Confirm → OK」を押す。その後、Watch対応画面の「iPhoneの接続を確認」を押す。外部の接続先を使うRemote Server設定には、この操作をそのまま当てはめない。自動検出できないネットワークの場合は、控えた設定へ戻してログで調べる。
+
 ### SideStoreが開けないままの場合
 
 起動できないアプリ自身の修復ボタン・自動更新は実行できない。iOSが署名を受け付けない場合は新しい署名が必要で、アプリ内部からそれを回避する機能は実装できない。
@@ -55,7 +59,8 @@ WindowsのLoaderから**今回の改造版SideStoreだけを、同じApple Accou
 - CodeSignKit `d0c67710fda9a2646b9e829cb2cf443892728371`をローカル依存にし、SideSignのテストとXcode実アーカイブの両方を修正版に向ける。テストだけ直った別依存にしない。
 - ASN.1長さの負数・オーバーフロー・欠落・負のオフセットを拒否し、PKCS#12解析をクラッシュから通常の失敗へ変える。証明書そのものや秘密鍵は消さない。
 - OS版・ビルド文字列の変化を検出して、次のRemote Pairing起動前に既存のBonjourポート再検出を試す。具体的なiOS版の比較・上限値には依存しない。初回導入では以前のOSを推定できないので、明示ボタンを使える。
-- 再検出失敗時は最後のポートを保持する。手動ポート指定・自動再試行のオフ設定は維持する。
+- 再検出失敗時は最後のポートを保持する。手動ポート指定・自動再試行のオフ設定は維持する。追加の自動再検出はLocal VPNモードに限定し、Remote Serverの設定は変更しない。
+- 新規オンボーディングではiOS/tvOS 17以降にRemote Pairingを優先し、Windows製ならLockdownという古い案内を修正する。保存済みのプロトコル選択は変更しない。
 - RemotePairingError 1016を「ロックを解除して再試行」として扱い、誤ったペアリング再作成誘導を減らす。
 - 接続確認と復旧ガイドの画面を追加する。ここでの成功はiPhoneとの通信成功であり、Apple認証・署名・Watch導入成功の証明ではない。
 - ペアリングのImportでは旧ファイルを先に削除せず、atomic書き込みで置き換える。書き込み失敗で旧ファイルを失う窓をなくす。別ファイルの端末同一性を自動証明する機能ではない。
@@ -72,6 +77,19 @@ swift test --filter 'WatchSupportTests|OSRecoveryTests'
 
 ビルドは`.github/workflows/sidestore-watch-probe.yml`の専用ブランチで行う。元の実機成功版は置き換えず保持する。
 
+## ビルド検証（2026-11-25）
+
+[最終CI 45633315578](https://github.com/9andmoai/Fairway/actions/runs/45633315578)、コードコミット`0f44f5edb8f1cc240da8bce46fb954dfa8d550dd`。復旧判定12件、Watch通信8件、証明書解析5件、Watch署名27件の計52件が成功し、iPhone向けIPAのアーカイブも成功した。実機のOS更新・起動不能からの復旧・今回のIPAによるWatch更新は未確認。
+
+## 今回の配布ファイル
+
+ローカルの`release/SideStore-Watch-OS-Recovery-20261125/`に保存した。IPAは`SideStore-Watch-OS-Recovery.ipa`、対応ソースは`SideStore-Watch-OS-Recovery-source.zip`、検証記録は`verification.json`。IPAは未署名なので既存と同じアカウント・署名後アプリIDで署名する。旧実機成功版のIPAとソースは残している。
+
+- IPA SHA256: `41be6e7800bd2a101dc492c95693bf57edd90478f798af45ee39e08f68818b60`
+- Source SHA256: `2b80e8e2fe326bd42e67c33353569de1422405941932a0710362b92711c50137`
+
+`release/`はGit管理対象外。GitHub Actionsのartifactは保持期限がある。恒久的なGitHub Releaseへ今回の候補IPAを公開したわけではない。コード・手順・検証記録は`sidestore-os-recovery-20261125`ブランチに保存している。
+
 ## 確認すべき受け入れ条件
 
 - [ ] 改造版を同一IDで上書きし、SideStoreが開く。既存のアプリ一覧・Accountが維持される。
@@ -86,3 +104,7 @@ swift test --filter 'WatchSupportTests|OSRecoveryTests'
 [SideInstallerのPairingController](https://github.com/FrizzleM/SideInstaller/blob/08936ec54189a6b4f9228ac605ab6f21c8d283d8/ios-app/PairingController.swift)と[Rust側ホスト実装](https://github.com/FrizzleM/SideInstaller/blob/08936ec54189a6b4f9228ac605ab6f21c8d283d8/rust-core/src/pairing.rs)には、同じiPhoneでRemote Pairingホストを動かし、設定側の承認でファイルを作る実装がある。PINを別画面でも見られるようにする処理、設定へ移動中の実行維持、キャンセル・段階ごとのタイムアウト、ホスト識別子の維持が必要になる。
 
 これは「PCなしで新しいペアリングを生成する」追加候補。ただし、起動しないSideStore自身でこの処理を実行することはできない。別の既に起動できる署名ツールや別端末を使う復旧経路は別途設計が必要。今回はこのコードを無検証で移植せず、起動障害・接続障害の区別と既存経路を壊さない対策を適用した。
+
+## 次のOS更新の前後
+
+更新前にSideStoreとFairwayを手動Refreshして、Watch起動を確認しておく。更新後はパスコードで一度ロック解除し、Wi-Fi・VPN・自動更新設定を確認してから、接続確認と両アプリの手動Refresh、Watch起動を順に確認する。これで将来の仕様変更を防げるわけではないが、期限の余裕を持って障害を切り分けられる。

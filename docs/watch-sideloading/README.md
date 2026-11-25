@@ -1,6 +1,6 @@
 ---
 topic: reusable-watch-sideloading
-updated: 2026-11-05
+updated: 2026-11-25
 status: physical-install-and-manual-refresh-verified
 scope: self-built-ios-app-with-embedded-watch-app
 ---
