@@ -25,7 +25,7 @@ status: implementation-under-test-physical-recovery-unverified
 
 ## 操作手順：まずiPhoneだけで確認
 
-1. iPhoneを通常の方法で再起動し、**パスコードで一度ロック解除**する。SideStoreを開く。
+1. iPhoneを通常の方法で再起動し、**パスコードで一度ロック解除**する。AppライブラリでSideStoreを検索して開く。ホームの古いショートカットだけが反応しない場合と分ける。
 2. 起動を拒否するアラートが出た場合は、その文言を記録する。「もう利用できません」等はペアリング修正では直せない場合がある。
 3. iPhoneの「設定 → 一般 → VPNとデバイス管理」で、SideStoreに使っている開発者が信頼済みか確認する。信頼の確認が表示された場合だけ案内に従う。「Appを削除」は押さない。
 4. 「設定 → プライバシーとセキュリティ → デベロッパモード」が表示される場合は有効か確認する。既に有効なら不要なオフ・オンはしない。
@@ -81,3 +81,8 @@ swift test --filter 'WatchSupportTests|OSRecoveryTests'
 - [ ] ショートカットの自動実行結果と、旧署名期限後のWatch起動を別途確認する。
 
 未知のiOSでAppleが通信方式や署名要件を変える場合は、新しい実装が必要になり得る。今回は既知の失敗の扱いと復旧性を改善するもので、将来の全iOSでの無条件動作を保証しない。
+## 別実装の参考：端末内での再ペアリング
+
+[SideInstallerのPairingController](https://github.com/FrizzleM/SideInstaller/blob/08936ec54189a6b4f9228ac605ab6f21c8d283d8/ios-app/PairingController.swift)と[Rust側ホスト実装](https://github.com/FrizzleM/SideInstaller/blob/08936ec54189a6b4f9228ac605ab6f21c8d283d8/rust-core/src/pairing.rs)には、同じiPhoneでRemote Pairingホストを動かし、設定側の承認でファイルを作る実装がある。PINを別画面でも見られるようにする処理、設定へ移動中の実行維持、キャンセル・段階ごとのタイムアウト、ホスト識別子の維持が必要になる。
+
+これは「PCなしで新しいペアリングを生成する」追加候補。ただし、起動しないSideStore自身でこの処理を実行することはできない。別の既に起動できる署名ツールや別端末を使う復旧経路は別途設計が必要。今回はこのコードを無検証で移植せず、起動障害・接続障害の区別と既存経路を壊さない対策を適用した。
