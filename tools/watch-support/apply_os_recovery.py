@@ -106,6 +106,15 @@ func fairwayCheckPhoneConnection() async throws {
         }
         UserDefaults.standard.set(fwCurrentOS, forKey: fwOSKey)
 ''')
+    replace(store, 'SideStore/Views/Onboarding/OnboardingView.swift',
+            '    @State private var selectedPairingProtocol: PairingProtocol = .lockdown',
+            '''    @State private var selectedPairingProtocol: PairingProtocol = {
+        if #available(iOS 17.0, tvOS 17.0, *) { return .rppairing }
+        return .lockdown
+    }()''')
+    replace(store, 'SideStore/Views/Onboarding/OnboardingView.swift',
+            'Fairway試験版：WindowsのLoaderから渡したファイルはLockdownを選びます。',
+            'iOS 17以降はRemote Pairingを優先します。作成元がWindowsでも、ファイルの形式に合わせて選択してください。')
     path = 'SideStore/Core/WatchSupportSettings.swift'
     replace(store,path,'            Section("使い方") {', '''            Section("iOS更新後の接続確認") {
                 Text("OS Recovery 20261125").font(.caption).foregroundColor(.secondary)
