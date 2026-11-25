@@ -98,8 +98,8 @@ func fairwayCheckPhoneConnection() async throws {
         let fwOSKey = "FWOSRecoveryLastObservedOS"
         let fwCurrentOS = ProcessInfo.processInfo.operatingSystemVersionString
         if SideSign.FWOSRecoveryAdvice.osChanged(previous: UserDefaults.standard.string(forKey: fwOSKey), current: fwCurrentOS) {
-            // Discard only a learned port; preserve manual overrides and trust.
-            UserDefaults.standard.removeObject(forKey: "lastDiscoveredRemotePairingPort")
+            // Keep the last usable port until discovery returns a replacement.
+            // Preserve manual overrides, accounts, and both phone/Watch trust.
             UserDefaults.standard.set(true, forKey: "FWOSRecoveryPortCheckPending")
         }
         UserDefaults.standard.set(fwCurrentOS, forKey: fwOSKey)

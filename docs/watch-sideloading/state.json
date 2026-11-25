@@ -219,5 +219,17 @@
     "automatic_refresh_execution_verified": false,
     "old_profile_expiry_survival_verified": false,
     "evidence": "Device-owner report in this conversation; no external device telemetry."
+  },
+  "os_update_recovery": {
+    "updated": "2026-11-25",
+    "guide": "docs/watch-sideloading/IOS_UPDATE_RECOVERY.md",
+    "branch": "sidestore-os-recovery-20261125",
+    "user_reported_ios": "27.2.1 (uncertain, family device)",
+    "symptom": "icon tapped but does not appear to open",
+    "cause_confirmed": false,
+    "pairing_failure_confirmed": false,
+    "physical_recovery_verified": false,
+    "preserve_apps_accounts_certificates_and_watch_trust": true,
+    "future_ios_compatibility_guaranteed": false
   }
 }
