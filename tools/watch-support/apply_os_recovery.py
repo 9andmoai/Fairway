@@ -74,7 +74,8 @@ def apply(store: Path):
     replace(store,path,'private func resolveDiscoveredRemotePairingPort() async -> UInt16? {\n    guard UserDefaults.standard.isAutoRetryRemotePairingPortEnabled else {', 'private func resolveDiscoveredRemotePairingPort(allowDisabled: Bool = false) async -> UInt16? {\n    guard allowDisabled || UserDefaults.standard.isAutoRetryRemotePairingPortEnabled else {')
     replace(store,path,'    await bindConnectionConfig()\n    debugLog("[SideStore] minimuxerStart(pairingFile) invoked")', '''    await bindConnectionConfig()
     if UserDefaults.standard.bool(forKey: "FWOSRecoveryPortCheckPending"),
-       preferred == .rppairing,
+       (preferred ?? PairingFileManager.shared.persistedActiveProtocol) == .rppairing,
+       (await getDeviceConnectionMode()) == .localVPN,
        let port = await resolveDiscoveredRemotePairingPort() {
         remotePairingPortCache = port
         minimuxer.set(MinimuxerParams(remotePairingPort: port))
@@ -85,7 +86,8 @@ def apply(store: Path):
         out.write('''
 // Explicit connection preflight: no account/certificate/trust reset.
 func fairwayCheckPhoneConnection() async throws {
-    if PairingFileManager.shared.preferredProtocol == .rppairing,
+    if (PairingFileManager.shared.preferredProtocol ?? PairingFileManager.shared.persistedActiveProtocol) == .rppairing,
+       (await getDeviceConnectionMode()) == .localVPN,
        let port = await resolveDiscoveredRemotePairingPort(allowDisabled: true) {
         remotePairingPortCache = port
         minimuxer.set(MinimuxerParams(remotePairingPort: port))
