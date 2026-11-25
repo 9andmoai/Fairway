@@ -27,7 +27,7 @@ with zipfile.ZipFile(source, 'w', zipfile.ZIP_DEFLATED) as archive:
         archive.write(path, 'SideStore/'+relative.as_posix())
     here = Path(__file__).resolve().parent
     for path in here.rglob('*'):
-        if path.is_file() and '__pycache__' not in path.parts:
+        if path.is_file() and not any(part in {'.build', '.swiftpm', '.git', '__pycache__'} for part in path.parts):
             archive.write(path, 'PersonalBuild/'+path.relative_to(here).as_posix())
     if (root/'NativeIDeviceSource/ffi/src/watch_connection_probe.rs').is_file():
         archive.write(here.parents[1]/'.github/workflows/sidestore-watch-probe.yml',
